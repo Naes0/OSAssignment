@@ -20,7 +20,7 @@ int main(int argc, char const *argv[])
    int t1 = 0;
    int t2 = 0;
    int i = 0;
-   int test; 
+
    FileDescriptors fileDes;
 
    if (argc != 5)
