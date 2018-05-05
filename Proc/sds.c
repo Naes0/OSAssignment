@@ -20,7 +20,7 @@ int main(int argc, char const *argv[])
    int t1 = 0;
    int t2 = 0;
    int i = 0;
-   
+
    FileDescriptors fileDes;
 
    if (argc != 5)
@@ -67,8 +67,11 @@ int main(int argc, char const *argv[])
          }
          fclose(data->fp);
       }
+
+      //opening file writer to write to the file sim_out
       data->fp = fopen("sim_out", "w");
 
+      //initialising data buffer to zero
       for(int i = 0; i < 20; i++)
       {
          data->dataBuffer[i] = 0;
@@ -76,11 +79,16 @@ int main(int argc, char const *argv[])
 
       // get parent id
       pid_t parentPid = getpid();
+
+      // forking and creating processes for the appropriate number of readers and writers
       createProccess(parentPid, r, w, t1, t2);
 
    }
-   fclose(data->fp);
+   fclose(data->fp); //closing file pointer
+
+   // final print of the reader and writer counts
    printf("\nreadcount: %d\nwritecount: %d\n", data->readercount, data->writercount);
+   //destroying shared memory and semaphores
    destroySemaphores();
    destroySharedMemory(&fileDes);
 
@@ -100,7 +108,7 @@ void createProccess(pid_t parentPid, int r, int w, int t1, int t2)
       }
    }
 
-   if (getpid() != parentPid)
+   if (getpid() != parentPid) //child processes call reader function
    {
       reader(t1, r);
    }
@@ -118,10 +126,10 @@ void createProccess(pid_t parentPid, int r, int w, int t1, int t2)
    if (getpid() != parentPid)
    {
       printf("\nI am writer: %d", (int) getpid());
-      writer(t2);
+      writer(t2); //child processes call writer function
    }
 
-   while (wait(NULL)> 0)
+   while (wait(NULL)> 0) //making parent wait for childern to terminate
    {
       printf("\n%d: waiting....\n", getpid());
    }
@@ -137,7 +145,7 @@ void reader(int timer1, int r)
    int value = 0;
    printf("\nI am reader: %d", (int) getpid());
 
-   while(readSize != 100)
+   while(readSize != 100) // while each reader process has not read 100 times
    {
       sem_wait(&sems->semReader); //lock reader 0
          data->readercount++;
@@ -150,9 +158,9 @@ void reader(int timer1, int r)
          //reading is preformed
          if(data->dataBufferIndex == 20) //if the writers have filled the data buffer
          {
-            if (data->readersRun == r)
+            if (data->readersRun == r) // if the current reader processes running equal the total readers created
             {
-               for(int i = 0; i < 20; i++)
+               for(int i = 0; i < 20; i++) // then read from data buffer
                {
                   readData = data->dataBuffer[i];
                   printf("\nReader: %d    Read Data: %d\n", getpid(), readData); //print read data
@@ -160,7 +168,7 @@ void reader(int timer1, int r)
                   sleep(timer1);
                }
                sem_wait(&sems->semDBuffer);
-                  data->readersRun--;
+                  data->readersRun--; // decrease running readers since reading has finished
                sem_post(&sems->semDBuffer);
             }
          }
@@ -172,10 +180,10 @@ void reader(int timer1, int r)
          {
             for (int i = 0; i < 20; i++)
             {
-               data->dataBuffer[i] = 0;
+               data->dataBuffer[i] = 0; //reset buffer to 0;
             }
-            data->readersRun = r;
-            data->dataBufferIndex = 0;
+            data->readersRun = r;// sets running readers back to enter value for the next set of 20 elements
+            data->dataBufferIndex = 0; //setting index back to 0 so the writer starts from element 0 when writing to buffer
          }
          sem_post(&sems->semDBuffer);
 
@@ -190,10 +198,9 @@ void reader(int timer1, int r)
    }
    printf("readSize: %d\n", readSize);
    sem_wait(&sems->semSharedData);
-      fprintf(data->fp, "\nReader-%d has finished reading %d pieces of data from the data_buffer\n", getpid(), readSize);
+      fprintf(data->fp, "\nReader-%d has finished reading %d pieces of data from the data_buffer\n", getpid(), readSize); //printing out to sim_out
    sem_post(&sems->semSharedData);
-   exit(0);
-
+   exit(0); //terminate process
 }
 
 void writer(int timer2)
