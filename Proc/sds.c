@@ -216,19 +216,18 @@ void writer(int timer2)
                if(data->dataBufferIndex < 20) //buffer is no full
                {
                   writeData = data->sharedData[data->writerDataIndex]; //get data from shared data
-                  data->dataBuffer[data->dataBufferIndex] = writeData;
+                  data->dataBuffer[data->dataBufferIndex] = writeData; //write the recieved data to the data buffer
                   printf("\nWriter: %d    Written Data: %d    DataBuffer[%d]: %d \n", getpid(), writeData, data->dataBufferIndex, data->dataBuffer[data->dataBufferIndex]);   //print write data
-                  data->writercount++;
+                  data->writercount++; //increment counters
                   data->writerDataIndex++;
                   data->dataBufferIndex++;
                   writeSize++;
                   sleep(timer2);
                }
             sem_post(&sems->semWriter);
-      //printf("\nwriterSize: %d", writeSize);
    }
    sem_wait(&sems->semSharedData);
-      fprintf(data->fp, "\nWriter-%d has finished writing %d pieces of data to the data_buffer\n", getpid(), writeSize);
+      fprintf(data->fp, "\nWriter-%d has finished writing %d pieces of data to the data_buffer\n", getpid(), writeSize); //print out to sim_out
    sem_post(&sems->semSharedData);
    exit(0);
 }
