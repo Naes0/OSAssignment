@@ -14,8 +14,5 @@ typedef struct Data
 
 void reader(int t1, int r);
 void writer(int t2);
-void destroySemaphores();
-void initSemaphores();
-void createSharedMemory(FileDescriptors* fileDes);
-void destroySharedMemory(FileDescriptors *fileDes);
+void produceThreads()
 void createProccess(pid_t parentPid, int r, int w, int t1, int t2);
