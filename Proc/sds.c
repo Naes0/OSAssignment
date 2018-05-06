@@ -14,7 +14,6 @@ Data* data;
 
 int main(int argc, char const *argv[])
 {
-
    int r = 0;
    int w = 0;
    int t1 = 0;
@@ -196,7 +195,7 @@ void reader(int timer1, int r)
          }
          sem_post(&sems->semReader); //unlock reader 1
    }
-   printf("readSize: %d\n", readSize);
+   printf("\nreadSize: %d\n", readSize);
    sem_wait(&sems->semSharedData);
       fprintf(data->fp, "\nReader-%d has finished reading %d pieces of data from the data_buffer\n", getpid(), readSize); //printing out to sim_out
    sem_post(&sems->semSharedData);
@@ -265,7 +264,6 @@ void initSemaphores()
    sem_init(&sems->semDBuffer, 1, 1);
    sem_init(&sems->semReader, 1, 1);
    sem_init(&sems->semWriter, 1, 1);
-   sem_init(&sems->semExtra, 1, 1);
 }
 
 void destroySemaphores()
@@ -274,5 +272,4 @@ void destroySemaphores()
    sem_destroy(&sems->semDBuffer);
    sem_destroy(&sems->semReader);
    sem_destroy(&sems->semWriter);
-   sem_destroy(&sems->semExtra);
 }
