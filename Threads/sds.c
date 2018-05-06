@@ -14,10 +14,10 @@ int w;
 int timer1;
 int timer2;
 
-pthread_mutex_t mutex;
-pthread_cond_t writert;
-pthread_cond_t readert;
-pthread_cond_t sharedData;
+//pthread_mutex_t mutex;
+pthread_mutex_t writert;
+pthread_mutex_t readert;
+pthread_mutex_t sharedData;
 
 
 int main(int argc, char const *argv[])
@@ -78,10 +78,10 @@ int main(int argc, char const *argv[])
       //opening file writer to write to the file sim_out
       data.fp = fopen("sim_out", "w");
 
-      pthread_mutex_init(&mutex, NULL);
-      pthread_cond_init(&writert, NULL);
-      pthread_cond_init(&readert, NULL);
-      pthread_cond_init(&sharedData, NULL);
+      //pthread_mutex_init(&mutex, NULL);
+      pthread_mutex_init(&writert, NULL);
+      pthread_mutex_init(&readert, NULL);
+      pthread_mutex_init(&sharedData, NULL);
 
       produceThreads();
    }
@@ -91,10 +91,10 @@ int main(int argc, char const *argv[])
    printf("\nreadcount: %d\nwritecount: %d\n", data.readercount, data.writercount);
 
    //destory threads;
-   pthread_mutex_destroy(&mutex);
-   pthread_cond_destroy(&writert);
-   pthread_cond_destroy(&readert);
-   pthread_cond_destroy(&sharedData);
+   //pthread_mutex_destroy(&mutex);
+   pthread_mutex_destroy(&writert);
+   pthread_mutex_destroy(&readert);
+   pthread_mutex_destroy(&sharedData);
 
    return 0;
 }
@@ -133,17 +133,17 @@ void* reader(void* nothing)
 
    printf("\nI am reader: %d", (int)pthread_self());
 
-   pthread_mutex_lock(&mutex);
+   //pthread_mutex_lock(&mutex);
 
    while(readSize != 100) // while each reader process has not read 100 times
    {
-      pthread_cond_wait(&readert, &mutex); //lock reader 0
+      pthread_mutex_lock(&readert); //lock reader 0
          data.readercount++;
          if(data.readercount == 1)
          {
-            pthread_cond_wait(&writert, &mutex); //lock writer 0
+            pthread_mutex_lock(&writert); //lock writer 0
          }
-      pthread_cond_signal(&readert); //unlock reader 1
+      pthread_mutex_unlock(&readert); //unlock reader 1
 
          //reading is preformed
          if(data.dataBufferIndex == 20) //if the writers have filled the data buffer
@@ -173,21 +173,21 @@ void* reader(void* nothing)
             data.dataBufferIndex = 0; //setting index back to 0 so the writer starts from element 0 when writing to buffer
          }
 
-      pthread_cond_wait(&readert, &mutex); //locks reader 0
+      pthread_mutex_lock(&readert); //locks reader 0
          data.readercount--;
          if(data.readercount == 0)
          {
-            pthread_cond_signal(&writert); //unlock writer 1
+            pthread_mutex_unlock(&writert); //unlock writer 1
          }
-         pthread_cond_signal(&readert); //unlock reader 1
+         pthread_mutex_unlock(&readert); //unlock reader 1
    }
    printf("\nreadSize: %d\n", readSize);
 
-   pthread_cond_wait(&sharedData, &mutex);
+   pthread_mutex_lock(&sharedData);
       fprintf(data.fp, "\nReader-%d has finished reading %d pieces of data from the data_buffer\n", (int)pthread_self(), readSize); //printing out to sim_out
-   pthread_cond_signal(&sharedData);
+   pthread_mutex_unlock(&sharedData);
 
-   pthread_mutex_unlock(&mutex);
+   //pthread_mutex_unlock(&mutex);
 
    pthread_exit(NULL); //terminate thread
 }
@@ -197,13 +197,13 @@ void* writer(void* nothing)
    int writeSize = 0; //amount of data written
    int writeData = 0; //read data cant be zero so this can be intiialised
    printf("\nI am writer: %d", (int) (int)pthread_self());
-   pthread_mutex_lock(&mutex);
+   //pthread_mutex_lock(&mutex);
 
-   pthread_cond_wait(&writert, &mutex);
+   pthread_mutex_lock(&writert);
    while(data.writerDataIndex != 100)
    {
-      pthread_cond_signal(&writert);
-            pthread_cond_wait(&writert, &mutex);
+      pthread_mutex_unlock(&writert);
+            pthread_mutex_lock(&writert);
                if(data.dataBufferIndex < 20) //buffer is no full
                {
                   writeData = data.sharedData[data.writerDataIndex]; //get data from shared data
@@ -215,12 +215,12 @@ void* writer(void* nothing)
                   writeSize++;
                   sleep(timer2);
                }
-            pthread_cond_signal(&writert);
+            pthread_mutex_unlock(&writert);
    }
-   pthread_cond_wait(&sharedData, &mutex);
+   pthread_mutex_lock(&sharedData);
       fprintf(data.fp, "\nWriter-%d has finished writing %d pieces of data to the data_buffer\n", (int)pthread_self(), writeSize); //print out to sim_out
-   pthread_cond_signal(&sharedData);
-   pthread_mutex_unlock(&mutex);
+   pthread_mutex_unlock(&sharedData);
+   //pthread_mutex_unlock(&mutex);
 
    pthread_exit(NULL); //terminate thread
 }

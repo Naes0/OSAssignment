@@ -1,4 +1,4 @@
-#include <semaphore.h>
+#include <stdio.h>
 
 typedef struct Data
 {
@@ -12,7 +12,6 @@ typedef struct Data
    FILE* fp;
 }Data;
 
-void* reader();
-void* writer();
-void produceThreads()
-void createProccess(pid_t parentPid, int r, int w, int t1, int t2);
+void* reader(void*);
+void* writer(void*);
+void produceThreads();
