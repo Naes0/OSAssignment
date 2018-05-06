@@ -217,6 +217,7 @@ void* writer(void* nothing)
                }
             //pthread_mutex_unlock(&writert);
    }
+   //pthread_mutex_unlock(&writert);
    pthread_mutex_lock(&sharedData);
       fprintf(data.fp, "\nWriter-%d has finished writing %d pieces of data to the data_buffer\n", (int)pthread_self(), writeSize); //print out to sim_out
    pthread_mutex_unlock(&sharedData);
