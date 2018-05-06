@@ -199,11 +199,11 @@ void* writer(void* nothing)
    printf("\nI am writer: %d", (int) (int)pthread_self());
    //pthread_mutex_lock(&mutex);
 
-   pthread_mutex_lock(&writert);
+   //pthread_mutex_lock(&writert);
    while(data.writerDataIndex != 100)
    {
-      pthread_mutex_unlock(&writert);
-            pthread_mutex_lock(&writert);
+      //pthread_mutex_unlock(&writert);
+            //pthread_mutex_lock(&writert);
                if(data.dataBufferIndex < 20) //buffer is no full
                {
                   writeData = data.sharedData[data.writerDataIndex]; //get data from shared data
@@ -215,7 +215,7 @@ void* writer(void* nothing)
                   writeSize++;
                   sleep(timer2);
                }
-            pthread_mutex_unlock(&writert);
+            //pthread_mutex_unlock(&writert);
    }
    pthread_mutex_lock(&sharedData);
       fprintf(data.fp, "\nWriter-%d has finished writing %d pieces of data to the data_buffer\n", (int)pthread_self(), writeSize); //print out to sim_out
