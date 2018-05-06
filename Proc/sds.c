@@ -231,7 +231,7 @@ void writer(int timer2)
    exit(0);
 }
 
-//Creates shared memory blocks to allow processes to access shared data
+//Creates  memory blocks to allow processes to access shared data
 void createSharedMemory(FileDescriptors* fileDes)
 {
    //creates shared memory which then points to its respective FileDescriptors.

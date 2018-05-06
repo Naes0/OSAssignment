@@ -1,20 +1,5 @@
 #include <semaphore.h>
 
-typedef struct Semaphores
-{
-   sem_t semSharedData;
-   sem_t semDBuffer;
-   sem_t semReader;
-   sem_t semWriter;
-   sem_t semExtra;
-}Semaphores;
-
-typedef struct FileDescriptors
-{
-   int fdData;
-   int fdSemaphores;
-}FileDescriptors;
-
 typedef struct Data
 {
    int sharedData[100];
