@@ -12,7 +12,7 @@ typedef struct Data
    FILE* fp;
 }Data;
 
-void reader(int t1, int r);
-void writer(int t2);
+void* reader();
+void* writer();
 void produceThreads()
 void createProccess(pid_t parentPid, int r, int w, int t1, int t2);

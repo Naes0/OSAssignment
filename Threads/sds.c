@@ -13,13 +13,19 @@ pthread_mutex_t mutex;
 pthread_cond_t writer;
 pthread_cond_t reader;
 
+int r;
+int w;
+int timer1;
+int timer2;
+
 int main(int argc, char const *argv[])
 {
-   int r = 0;
-   int w = 0;
-   int t1 = 0;
-   int t2 = 0;
+
    int i = 0;
+   r = 0
+   w = 0;
+   timer1 = 0;
+   timer2 = 0;
 
    if (argc != 5)
    {
@@ -32,9 +38,9 @@ int main(int argc, char const *argv[])
       // from command line arguments[]
       r = atoi(argv[1]);
       w = atoi(argv[2]);
-      t1 = atoi(argv[3]);
-      t2 = atoi(argv[4]);
-      printf("r = %d, w = %d, t1 = %d, t2 = %d\n", r, w, t1, t2);
+      timer1 = atoi(argv[3]);
+      timer2 = atoi(argv[4]);
+      printf("r = %d, w = %d, t1 = %d, t2 = %d\n", r, w, timer1, timer2);
 
       //initialise Data
       data->readercount = 0;
@@ -75,7 +81,7 @@ int main(int argc, char const *argv[])
       pthread_cond_init(&writer, NULL);
       pthread_cond_init(&reader, NULL);
 
-      produceThreads(r, w, t1, t2);
+      produceThreads();
 
    }
    fclose(data->fp); //closing file pointer
@@ -91,7 +97,7 @@ int main(int argc, char const *argv[])
    return 0;
 }
 
-void produceThreads(int r, int w, int t1, int t2)
+void produceThreads()
 {
    //create threads for readers
    pthread_t rthreads[r];
@@ -100,22 +106,30 @@ void produceThreads(int r, int w, int t1, int t2)
 
    for (int i = 0; i < r; i++)
    {
-      pthread_create(&rthreads[i], NULL, &reader,something);
+      pthread_create(&rthreads[i], NULL, &reader, NULL);
    }
+   for (int i = 0; i < w; i++)
+   {
+      pthread_create(&wthreads[i], NULL, &writer, NULL);
+   }
+
+   //joining
    for (int i = 0; i < r; i++)
    {
-      pthread_create(&wthreads[i], NULL, &writer, (void*)t2);
+      pthread_join(&rthreads[i], NULL);
    }
-
-
+   for (int i = 0; i < w; i++)
+   {
+      pthread_join(&wthreads[i], NULL);
+   }
 }
 
 
-void* reader(int timer1, int r)
+void* reader(void* nothing)
 {
    int readSize = 0; //amount of data read
    int readData = 0; //read data cant be zero so this can be intiialised
-   int readDataIndex = 0;
+
    int value = 0;
    printf("\nI am reader: %d", (int) getpid());
 
@@ -177,11 +191,10 @@ void* reader(int timer1, int r)
    exit(0); //terminate process
 }
 
-void* writer(void* t2)
+void* writer(void* nothing)
 {
    int writeSize = 0; //amount of data written
    int writeData = 0; //read data cant be zero so this can be intiialised
-   int timer2 = (int)(t2);
 
    sem_wait(&sems->semWriter);
    while(data->writerDataIndex != 100)
